@@ -1,0 +1,153 @@
+﻿
+<!DOCTYPE html>
+<html class=''>
+<head>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,900" rel="stylesheet" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="css\main.css">
+    <script>
+        var jsonChannel = '{"Channels":[{"Channel": "Sales","PostCount": 3,"IsChannelActive": 1},{"Channel": "First Impressions","PostCount": 32,"IsChannelActive": 0},{"Channel": "Onboarding","PostCount": 12,"IsChannelActive": 0}]}';
+        var jsonMessageThread = '{"MessageThread":[{"Channel":"Sales","Message":"Slack Technologies, Inc. (originally Tiny Speck) is a computer software startup founded in 2009, with personnel located in Vancouver, San Francisco and Dublin. The core team is largely drawn from the founders of Ludicorp, the company that created Flickr. Slack is the fastest company to receive a billion dollar valuation.","PostBy":"Ann.Pinter","PostByCode":"AP","PostDT":"Wed Jan 04 2017","PostTM":"12:31 PM","Tag":"Sales,SalesIdea,Sales2017"},{"Channel":"Sales","Message":"Rather than trying to make your own, use RocketMail instead..","PostBy":"Brian.Cass","PostByCode":"BC","PostDT":"Wed Jan 04 2017","PostTM":"11:31 AM","Tag":"Sales,SalesIdea,Sales2017"}]}';
+
+
+        function messageThreadInsert() {
+            var myObj = "";
+            myObj += '<div class="message">';
+            myObj += '<a class="message_profile" href=""><span class="innerTEXT">' + "AP" + '</span></a>';
+            myObj += '<a class="message_username" href="">' + "Ann.Pinter" + '</a>';
+            myObj += '<span class="message_timestamp">' + "" + ' </span>';
+            myObj += '<span class="message_timestamp">' + "" + ' </span>';
+            myObj += '<span class="message_star"></span>';
+            myObj += '<span class="message_content">' + $("#messageInput").val() + '</span>';
+            myObj += '</div>';
+            $('#uxMessageThread').prepend(myObj);
+
+            $("#messageInput").val("");
+        }
+        function channelGet() {
+            var obj = $.parseJSON(jsonChannel);
+
+            var objDataset = obj.Channels;
+
+            $.each(objDataset, function (index, value) {
+                if (objDataset[index].IsChannelActive == "1") {
+                    $('#uxChannel').append('<li class="channel active"><a class="channel_name" href="script:void(0);" onclick="messageThreadGet(\'' + objDataset[index].Channel + '\')"><span class="unread">' + objDataset[index].PostCount + '</span><span><span class="prefix">#</span>' + objDataset[index].Channel + '</span></a></li>');
+                    messageThreadGet(objDataset[index].Channel);
+                } else {
+                    $('#uxChannel').append('<li class="channel"><a class="channel_name" href="script:void(0);" onclick="messageThreadGet(\'' + objDataset[index].Channel + '\')"><span class="unread">' + objDataset[index].PostCount + '</span><span><span class="prefix">#</span>' + objDataset[index].Channel + '</span></a></li>');
+                }
+            });
+        };
+        function messageThreadGet(channel) {
+            alert(channel)
+            var obj = $.parseJSON(jsonMessageThread);
+            var myObj = "";
+            var objDataset = obj.MessageThread;
+
+            $.each(objDataset, function (index, value) {
+
+                myObj += '<div class="message">';
+                myObj += '<a class="message_profile" href=""><span class="innerTEXT">' + objDataset[index].PostByCode + '</span></a>';
+                myObj += '<a class="message_username" href="mailto:' + objDataset[index].PostBy + '@atriaSeniorLiving.com">' + objDataset[index].PostBy + '</a>';
+                myObj += '<span class="message_timestamp">' + objDataset[index].PostTM + ' </span>';
+                myObj += '<span class="message_timestamp">' + objDataset[index].PostDT + ' </span>';
+                myObj += '<span class="message_star"></span>';
+                myObj += '<span class="message_content">' + objDataset[index].Message + '</span>';
+                var myarray = objDataset[index].Tag.split(',');
+
+                for (var i = 0; i < myarray.length; i++) {
+                    myObj += '<a href="#" onclick="messageThreadGet(\'' + myarray[i] + '\')" class="message_tag">#' + myarray[i] + '</a>';
+                }
+                myObj += '</div>';
+                $(".channel-menu_name").html('<span class="channel-menu_prefix">#</span>' + objDataset[index].Channel);
+            });
+            $('#uxMessageThread').empty();
+            $('#uxMessageThread').append(myObj);
+        };
+        function mdlUserPreferenceSave() {
+            $('#mdlUserPreference').modal('hide')
+        }
+        function mdlUserPreferenceShow() {
+            $('#mdlUserPreference').modal('show')
+        }
+        $(document).ready(function () {
+
+            channelGet();
+
+            $("#messageInput").focus();
+            $("#messageInput").on("keypress", function (event) {
+                if (event.which == 13 && !event.shiftKey) {
+                    if ($("#messageInput").val().length != 0) {
+                        event.preventDefault();
+                        messageThreadInsert();
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="team-menu">IdeaXchange</div>
+        <div class="channel-menu">
+            <span class="channel-menu_name"><span class="channel-menu_prefix">#</span>SALES</span>
+        </div>
+    </div>
+    <div class="main">
+        <div class="listings">
+            <div class="listings_channels">
+                <h2 class="listings_header">Channels</h2>
+                <ul class="channel_list">
+                    <li id="uxChannel"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="message-history" id="uxMessageThread">
+        </div>
+    </div>
+    <div class="footer">
+        <div class="user-menu" onclick="$('#mdlUserPreference').modal('show');"><a class="user-menu_profile" href="javascript:$('#mdlUserPreference').modal('show');"><span class="innerTEXT">AP</span></a><span class="user-menu_username">Ann.Pinter</span><span class="connection_status">online</span></div>
+        <div class="input-box">
+            <input class="input-box_text" type="text" id="messageInput" />
+        </div>
+    </div>
+
+    <div class="modal fade" id="mdlUserPreference" tabindex="-1" role="dialog" aria-labelledby="sdf">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">User Preferences</h4>
+                </div>
+                <div class="modal-body" style="height:100px;">
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="TrasactionFlg" style="margin-top:11px;">Notifications</label>
+                        <div class="col-md-8">
+                            <div class="checkbox">
+                                <label for="TrasactionFlg">
+                                    <input type="checkbox" name="TrasactionFlg" id="TrasactionFlg" value="1" checked>
+                                    Notify me each time a post is made
+                                </label>
+                            </div>
+                            <div class="checkbox">
+                                <label for="DailyFlg">
+                                    <input type="checkbox" name="DailyFlg" id="DailyFlg" value="1" checked>
+                                    Notify me daily when new posts are made
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="mdlUserPreferenceSave()">Save changes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+</body>
+</html>
